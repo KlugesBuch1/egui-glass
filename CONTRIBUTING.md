@@ -5,7 +5,7 @@ or a substantial visual change, open an issue describing the use case first.
 
 ## Development
 
-Install Rust 1.92 or newer and clone the repository. Run commands from the repository root:
+Install Rust 1.95 or newer and clone the repository. Run commands from the repository root:
 
 ```bash
 cargo run -p egui_glass_demo
@@ -66,7 +66,7 @@ Remove credentials and private application data from logs and screenshots.
 1. Review the diff, update the changelog and version, and refresh `Cargo.lock` if needed.
 2. Run the checks above, including default features separately from the serde-enabled workspace.
    Build docs with `RUSTDOCFLAGS="-D warnings"` and check the minimum Rust version with
-   `cargo +1.92.0 check -p egui_glass --all-features --locked`.
+   `cargo +1.95.0 check -p egui_glass --all-features --locked`.
 3. Visually check the demo on the target GPUs. Keep [asset credits](docs/assets.md) up to date
    when changing demo images; library packaging does not include those assets.
 4. Keep `crates/egui_glass/LICENSE` identical to the root `LICENSE`. Run

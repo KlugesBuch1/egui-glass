@@ -18,7 +18,7 @@ material transitions for buttons and sliders; released 0.1.5 switches states ins
 
 ## Quick start
 
-Requires Rust 1.92+, egui/eframe 0.35, and wgpu 29. Use the **wgpu** renderer; glow is unsupported.
+Requires Rust 1.95+, egui/eframe 0.37, and wgpu 30. Use the **wgpu** renderer; glow is unsupported.
 The `wayland` and `x11` features below enable Linux windowing. A wgpu-compatible graphics
 adapter is required. Start with `cargo new glass-app`, replace its dependencies with the
 following, put the Rust example in `src/main.rs`, and run `cargo run`. No assets or local
@@ -26,8 +26,8 @@ checkout of this repository are needed.
 
 ```toml
 [dependencies]
-eframe = { version = "0.35", default-features = false, features = ["accesskit", "default_fonts", "wgpu", "wayland", "x11"] }
-egui = "0.35"
+eframe = { version = "0.37", default-features = false, features = ["accesskit", "clipboard", "default_fonts", "wgpu", "wayland", "x11"] }
+egui = "0.37"
 egui_glass = "0.1.5"
 ```
 

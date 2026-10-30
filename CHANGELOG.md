@@ -6,6 +6,7 @@ These changes are available in the development checkout; the published crate rem
 
 ### Integration
 
+- Require egui, eframe, and egui-wgpu 0.37, wgpu 30, and Rust 1.95.
 - Add `GlassContext` for one-call setup, shared font configuration, validated backdrop
   uploads and cloneable `GlassTexture` handles that release both texture registrations.
 - Reject duplicate initialization and unsupported MSAA counts without replacing resources.

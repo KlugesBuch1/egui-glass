@@ -19,7 +19,7 @@ egui 콘텐츠 자체를 굴절시키는 라이브 백드롭도 선택적으로 
 
 ## 빠른 시작
 
-Rust 1.92 이상, egui/eframe 0.35, wgpu 29가 필요합니다. 렌더러는 **wgpu**를 써야 하며
+Rust 1.95 이상, egui/eframe 0.37, wgpu 30이 필요합니다. 렌더러는 **wgpu**를 써야 하며
 glow는 지원하지 않습니다. 아래 `wayland`, `x11` 피처는 Linux 창 생성을 위한 것입니다.
 wgpu를 지원하는 그래픽 어댑터가 있어야 합니다. `cargo new glass-app`으로 프로젝트를 만들고
 의존성을 아래 내용으로 바꾼 뒤, Rust 예제를 `src/main.rs`에 넣고 `cargo run`을 실행하세요.
@@ -27,8 +27,8 @@ wgpu를 지원하는 그래픽 어댑터가 있어야 합니다. `cargo new glas
 
 ```toml
 [dependencies]
-eframe = { version = "0.35", default-features = false, features = ["accesskit", "default_fonts", "wgpu", "wayland", "x11"] }
-egui = "0.35"
+eframe = { version = "0.37", default-features = false, features = ["accesskit", "clipboard", "default_fonts", "wgpu", "wayland", "x11"] }
+egui = "0.37"
 egui_glass = "0.1.5"
 ```
 

@@ -1,7 +1,7 @@
 //! Apple Liquid Glass style widgets for egui, rendered on the GPU through
 //! egui-wgpu paint callbacks.
 //!
-//! Requires egui / egui-wgpu 0.35 and wgpu 29. With eframe, enable its `wgpu`
+//! Requires egui / egui-wgpu 0.37 and wgpu 30. With eframe, enable its `wgpu`
 //! feature and select `eframe::Renderer::Wgpu`; the glow renderer is unsupported.
 //!
 //! ```no_run

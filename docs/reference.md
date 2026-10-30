@@ -24,7 +24,7 @@ works, its limits, the demo, packaging and publishing. For the short version see
 |---|---|---|
 | `init(render_state: &RenderState, msaa_samples: u32)` | once | Compiles the glass pipeline and installs shared GPU resources into egui-wgpu's callback resources. `msaa_samples` must match `NativeOptions::multisampling` (pass 1 when that is 0). |
 
-Requirements: Rust 1.92+, `eframe`/`egui-wgpu` 0.35, wgpu 29. Backends: Metal, Vulkan, DX12
+Requirements: Rust 1.95+, `eframe`/`egui-wgpu` 0.37, wgpu 30. Backends: Metal, Vulkan, DX12
 (selected by the host's wgpu configuration). These are backend options, not a claim of runtime
 verification on every device. The glow backend is not supported because the effect is a wgpu paint
 callback.
@@ -316,7 +316,7 @@ cargo clippy --workspace --all-targets --all-features    # kept warning-free
 ```
 
 CI (`.github/workflows/ci.yml`) runs default/serde library tests and clippy on Linux, macOS and
-Windows, checks Rust 1.92, builds API docs and the package, and builds the demo on macOS and
+Windows, checks Rust 1.95, builds API docs and the package, and builds the demo on macOS and
 Windows. These automated checks do not exercise GPU rendering.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for the release checklist. `release.yml` checks the tag

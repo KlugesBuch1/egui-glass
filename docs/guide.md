@@ -7,9 +7,9 @@ This guide adds topic-specific details. See the [reference](reference.md) for th
 
 ## 1. Requirements
 
-- `eframe` 0.35 with the **wgpu** feature (`renderer: eframe::Renderer::Wgpu`). The glow backend
+- `eframe` 0.37 with the **wgpu** feature (`renderer: eframe::Renderer::Wgpu`). The glow backend
   is not supported.
-- Rust 1.92 or newer.
+- Rust 1.95 or newer.
 
 ```toml
 egui_glass = "0.1.5"                                      # add features = ["serde"] to save styles
