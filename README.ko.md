@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/heonny/egui-glass/main/assets/branding/readme-logo.png" alt="egui_glass" width="640">
 </p>
 
-[English](https://github.com/heonny/egui-glass/blob/main/README.md) | **한국어**
+[English](https://github.com/heonny/egui-glass/blob/main/README.md) | [Deutsch](https://github.com/heonny/egui-glass/blob/main/README.de.md) | **한국어**
 
 [![CI](https://github.com/heonny/egui-glass/actions/workflows/ci.yml/badge.svg)](https://github.com/heonny/egui-glass/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/egui_glass.svg)](https://crates.io/crates/egui_glass)
