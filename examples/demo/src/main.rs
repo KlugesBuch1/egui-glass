@@ -226,7 +226,7 @@ impl App {
     }
 
     fn handle_drop(&mut self, ctx: &egui::Context) {
-        if let Some(path) = ctx.input(|i| i.raw.dropped_files.first().and_then(|f| f.path.clone())) {
+        if let Some(path) = ctx.input(|i| i.raw.dropped_files.first().map(|f| f.path().to_path_buf())) {
             self.load_photo(&path);
         }
     }
@@ -266,7 +266,7 @@ impl App {
         let area = |id: &str, pos: egui::Pos2| {
             // constrain(false): on an area's first (sizing) frame egui assumes a 600x400 size and
             // would clamp the position into the screen and store that wrong position.
-            let area = egui::Area::new(egui::Id::new((id, portrait))).movable(true).constrain(false).default_pos(pos);
+            let area = egui::Area::new(egui::Id::unique((id, portrait))).movable(true).constrain(false).default_pos(pos);
             if relayout { area.current_pos(pos) } else { area }
         };
 
@@ -313,7 +313,7 @@ impl App {
                 GlassToolbar::new(style).show(ui, |ui| {
                     for (icon, name) in [("↩", "Undo"), ("🗀", "Open folder"), ("🗑", "Delete")] {
                         let response = ui.button(egui::RichText::new(icon).size(18.0));
-                        response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), name));
+                        response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), name));
                     }
                 });
                 ui.add_space(8.0);
@@ -363,7 +363,7 @@ impl App {
             ui.add_space((end - ui.cursor().top()).max(0.0));
             photo_rect
         });
-        self.scroll_offset = output.state.offset.y;
+        self.scroll_offset = output.state.unclamped_offset().y;
         output.inner
     }
 

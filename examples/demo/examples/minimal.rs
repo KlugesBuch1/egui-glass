@@ -20,13 +20,13 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().frame(egui::Frame::NONE).show(ui, |ui| {
             egui_glass::show_backdrop(ui, ui.max_rect());          // draw the backdrop, record where it is
-            egui::Area::new(egui::Id::new("card")).movable(true).constrain(false).show(ui.ctx(), |ui| {
+            egui::Area::new(egui::Id::unique("card")).movable(true).constrain(false).show(ui.ctx(), |ui| {
                 Glass::default().show(ui, |ui| {
                     ui.heading("Hello glass");
                     GlassButton::new("Continue").show(ui);
                 });
             });
-            egui::Area::new(egui::Id::new("bar")).movable(true).constrain(false).show(ui.ctx(), |ui| {
+            egui::Area::new(egui::Id::unique("bar")).movable(true).constrain(false).show(ui.ctx(), |ui| {
                 GlassToolbar::default().show(ui, |ui| {
                     let _ = ui.button("Undo");
                     let _ = ui.button("Share");

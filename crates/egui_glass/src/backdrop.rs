@@ -17,7 +17,7 @@ pub(crate) struct BackdropState {
 }
 
 fn state_id() -> Id {
-    Id::new("egui_glass::backdrop")
+    Id::unique("egui_glass::backdrop")
 }
 
 pub(crate) fn backdrop_state(ctx: &Context) -> Option<BackdropState> {

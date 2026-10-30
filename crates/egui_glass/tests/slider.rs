@@ -3,11 +3,12 @@ use egui_glass::GlassSlider;
 
 fn frame(ctx: &Context, value: &mut f32, events: Vec<Event>, enabled: bool) -> (egui::FullOutput, Response) {
     let mut response = None;
-    let output = ctx.run_ui(RawInput { events, ..Default::default() }, |ui| {
+    let mut output = ctx.run_ui(RawInput { events, ..Default::default() }, |ui| {
         ui.add_enabled_ui(enabled, |ui| {
             response = Some(GlassSlider::new(value, 0.0..=100.0).text("Volume").step_by(1.0).width(240.0).show(ui));
         });
     });
+    output.textures_delta.clear();
     (output, response.unwrap())
 }
 
@@ -70,7 +71,7 @@ fn fixed_and_reversed_ranges_keep_the_thumb_inside_the_track() {
     for (range, mut value) in [(5.0..=5.0, 5.0), (100.0..=0.0, 25.0)] {
         let ctx = Context::default();
         let mut track = None;
-        let output = ctx.run_ui(RawInput::default(), |ui| {
+        let mut output = ctx.run_ui(RawInput::default(), |ui| {
             track = Some(GlassSlider::new(&mut value, range.clone()).width(240.0).show(ui).rect);
         });
         let thumb = output.shapes.iter().find_map(|shape| match &shape.shape {
@@ -80,6 +81,7 @@ fn fixed_and_reversed_ranges_keep_the_thumb_inside_the_track() {
         assert!(thumb.is_finite());
         assert!(track.unwrap().contains(thumb.center()));
         if *range.start() == *range.end() { assert_eq!(value, 5.0); }
+        output.textures_delta.clear();
     }
 }
 

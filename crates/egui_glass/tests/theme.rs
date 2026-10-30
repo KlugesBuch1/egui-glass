@@ -7,7 +7,7 @@ fn containers_preserve_host_visuals_only_when_requested() {
         for toolbar in [false, true] {
             for preserve in [None, Some(false), Some(true)] {
                 let ctx = Context::default();
-                let _ = ctx.run_ui(RawInput::default(), |ui| {
+                let mut output = ctx.run_ui(RawInput::default(), |ui| {
                     let mut visuals = if dark { Visuals::dark() } else { Visuals::light() };
                     visuals.widgets.inactive.bg_fill = Color32::RED;
                     visuals.widgets.inactive.bg_stroke = Stroke::new(3.0, Color32::GREEN);
@@ -36,6 +36,7 @@ fn containers_preserve_host_visuals_only_when_requested() {
                     assert_eq!(result, 42);
                     assert_eq!(ui.visuals(), &visuals, "container visuals must not leak into the parent");
                 });
+                output.textures_delta.clear();
             }
         }
     }

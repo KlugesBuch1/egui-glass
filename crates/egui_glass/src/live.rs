@@ -22,7 +22,7 @@ pub(crate) struct LiveState {
 }
 
 fn state_id() -> Id {
-    Id::new("egui_glass::live")
+    Id::unique("egui_glass::live")
 }
 
 pub(crate) fn live_state(ctx: &Context) -> Option<LiveState> {
@@ -99,7 +99,7 @@ impl LiveBackdrop {
         if let Some(fonts) = self.pending_fonts.lock().expect("font update lock poisoned").take() {
             self.twin.set_fonts(fonts);
         }
-        let (id, rect, clip, layer, layout) = (ui.id(), ui.max_rect(), ui.clip_rect(), ui.layer_id(), *ui.layout());
+        let (id, rect, clip, layer, layout) = (ui.scope_id(), ui.max_rect(), ui.clip_rect(), ui.layer_id(), *ui.layout());
         let twin = self.twin.clone();
         let output = self.twin.run_ui(input, |_root| {
             let mut ui = Ui::new(twin.clone(), id, UiBuilder::new().layer_id(layer).max_rect(rect).layout(layout));
@@ -123,6 +123,12 @@ struct FrameData {
     quality: LiveBackdropQuality,
 }
 
+impl Drop for FrameData {
+    fn drop(&mut self) {
+        self.textures_delta.clear();
+    }
+}
+
 struct LiveCallback {
     frame: Mutex<Option<FrameData>>,
 }
@@ -136,9 +142,11 @@ impl CallbackTrait for LiveCallback {
         encoder: &mut wgpu::CommandEncoder,
         resources: &mut CallbackResources,
     ) -> Vec<wgpu::CommandBuffer> {
-        let Some(frame) = self.frame.lock().ok().and_then(|mut f| f.take()) else { return Vec::new() };
-        let Some(res) = resources.get_mut::<LiveResources>() else { return Vec::new() };
-        let mut frame = frame;
+        let Some(mut frame) = self.frame.lock().ok().and_then(|mut f| f.take()) else { return Vec::new() };
+        let Some(res) = resources.get_mut::<LiveResources>() else {
+            frame.textures_delta.clear();
+            return Vec::new();
+        };
         // Native textures live in the app's renderer under different ids; remap the ones we know.
         for primitive in &mut frame.primitives {
             if let egui::epaint::Primitive::Mesh(mesh) = &mut primitive.primitive {
@@ -148,6 +156,7 @@ impl CallbackTrait for LiveCallback {
             }
         }
         if screen.size_in_pixels.contains(&0) {
+            frame.textures_delta.clear();
             return Vec::new();
         }
         let scaled_screen = frame.quality.screen(screen);
@@ -156,8 +165,10 @@ impl CallbackTrait for LiveCallback {
         let target = res.target.as_ref().expect("target created above");
         let mipgen = res.mipgen.clone();
 
-        for (id, delta) in &frame.textures_delta.set {
-            res.renderer.update_texture(device, queue, *id, delta);
+        for (id, deltas) in frame.textures_delta.set.drain() {
+            for delta in deltas {
+                res.renderer.update_texture(device, queue, id, &delta);
+            }
         }
         // Keep the original projection: rounding odd target sizes must not shift the page.
         let commands = res.renderer.update_buffers(device, queue, encoder, &frame.primitives, screen);
@@ -190,8 +201,8 @@ impl CallbackTrait for LiveCallback {
                 .forget_lifetime();
             res.renderer.render(&mut pass, &frame.primitives, &scaled_screen);
         }
-        for id in &frame.textures_delta.free {
-            res.renderer.free_texture(id);
+        for id in frame.textures_delta.free.drain() {
+            res.renderer.free_texture(&id);
         }
         mipgen.generate(encoder, target);
         let (sample_view, mips) = (target.sample_view.clone(), target.mip_levels());

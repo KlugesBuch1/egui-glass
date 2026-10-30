@@ -186,7 +186,7 @@ impl GlassButton {
         let size = (galley.size() + 2.0 * self.padding).max(self.min_size);
         let (rect, response) = ui.allocate_exact_size(size, Sense::click());
         let accessible_name = self.accessible_name.as_deref().unwrap_or_else(|| galley.text());
-        response.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::Button, ui.is_enabled(), accessible_name));
+        response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, ui.is_enabled(), accessible_name));
         if ui.is_rect_visible(rect) {
             let style = crate::animation::interaction_style(ui, &response, self.style, self.animate);
             paint_glass(ui, rect, &style);

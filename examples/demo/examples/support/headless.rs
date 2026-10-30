@@ -22,9 +22,8 @@ impl Harness {
         let target_format = wgpu::TextureFormat::Rgba8Unorm;
         let renderer = egui_wgpu::Renderer::new(&device, target_format, Default::default());
         let state = egui_wgpu::RenderState {
-            adapter, available_adapters: vec![], device, queue, target_format,
+            instance, adapter, available_adapters: vec![], device, queue, target_format,
             renderer: Arc::new(egui::mutex::RwLock::new(renderer)),
-            surface_config: egui_wgpu::SurfaceConfig::LOW_LATENCY,
         };
         egui_glass::init(&state, 1);
         let live = LiveBackdrop::new(&state, None);
@@ -49,7 +48,7 @@ impl Harness {
         let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(size[0] as f32, size[1] as f32) / self.screen.pixels_per_point);
         let mut input = egui::RawInput { screen_rect: Some(rect), ..Default::default() };
         input.viewports.get_mut(&egui::ViewportId::ROOT).expect("default root viewport").native_pixels_per_point = Some(self.screen.pixels_per_point);
-        let output = self.ctx.run_ui(input, |ui| {
+        let mut output = self.ctx.run_ui(input, |ui| {
             let page = |ui: &mut egui::Ui| draw_page(ui, rect, landmarks);
             if let Some(quality) = quality {
                 self.live.run_with_quality(ui, egui::Color32::WHITE, quality, page);
@@ -63,8 +62,10 @@ impl Harness {
         assert_eq!(output.pixels_per_point, self.screen.pixels_per_point);
         let layout_ms = start.elapsed().as_secs_f64() * 1000.0;
         let mut renderer = self.state.renderer.write();
-        for (id, delta) in &output.textures_delta.set {
-            renderer.update_texture(&self.state.device, &self.state.queue, *id, delta);
+        for (id, deltas) in output.textures_delta.set.drain() {
+            for delta in deltas {
+                renderer.update_texture(&self.state.device, &self.state.queue, id, &delta);
+            }
         }
         let mut encoder = self.state.device.create_command_encoder(&Default::default());
         let commands = renderer.update_buffers(&self.state.device, &self.state.queue, &mut encoder, &primitives, &self.screen);
@@ -80,7 +81,7 @@ impl Harness {
         }
         self.state.queue.submit(commands.into_iter().chain([encoder.finish()]));
         self.wait()?;
-        for id in &output.textures_delta.free { renderer.free_texture(id); }
+        for id in output.textures_delta.free.drain() { renderer.free_texture(&id); }
         Ok([layout_ms, start.elapsed().as_secs_f64() * 1000.0])
     }
 
@@ -100,7 +101,7 @@ impl Harness {
         buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| { let _ = tx.send(result); });
         self.wait()?;
         rx.recv_timeout(Duration::from_secs(10))??;
-        let data = buffer.slice(..).get_mapped_range();
+        let data = buffer.slice(..).get_mapped_range()?;
         for (i, expected) in COLORS.iter().enumerate() {
             let x = width * (1 + 2 * (i as u32 % 2)) / 4;
             let y = height * (1 + 2 * (i as u32 / 2)) / 4;

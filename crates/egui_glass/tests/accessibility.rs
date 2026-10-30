@@ -3,11 +3,12 @@ use egui_glass::GlassButton;
 
 fn frame(ctx: &Context, events: Vec<Event>, enabled: bool) -> (FullOutput, Response) {
     let mut response = None;
-    let output = ctx.run_ui(RawInput { events, ..Default::default() }, |ui| {
+    let mut output = ctx.run_ui(RawInput { events, ..Default::default() }, |ui| {
         ui.add_enabled_ui(enabled, |ui| {
             response = Some(GlassButton::new("Continue").show(ui));
         });
     });
+    output.textures_delta.clear();
     (output, response.unwrap())
 }
 
@@ -71,9 +72,10 @@ fn icon_button_exposes_its_accessible_name() {
     let ctx = Context::default();
     ctx.enable_accesskit();
     let mut id = None;
-    let output = ctx.run_ui(RawInput::default(), |ui| {
+    let mut output = ctx.run_ui(RawInput::default(), |ui| {
         id = Some(GlassButton::new("‹").icon().accessible_name("Back").show(ui).id);
     });
+    output.textures_delta.clear();
     let update = output.platform_output.accesskit_update.unwrap();
     let (_, node) = update.nodes.iter().find(|(node_id, _)| *node_id == id.unwrap().accesskit_id()).unwrap();
     assert_eq!(node.role(), accesskit::Role::Button);
@@ -101,23 +103,24 @@ fn assistive_click_activates_only_enabled_buttons() {
 fn tab_navigation_skips_disabled_buttons_and_reverses() {
     let ctx = Context::default();
     let mut ids = Vec::new();
-    let mut run = |events: Vec<Event>, modifiers: Modifiers| {
+    let mut run = |events: Vec<Event>| {
         ids.clear();
-        let _ = ctx.run_ui(RawInput { events, modifiers, ..Default::default() }, |ui| {
+        let mut output = ctx.run_ui(RawInput { events, ..Default::default() }, |ui| {
             ids.push(GlassButton::new("First").show(ui).id);
             ui.add_enabled_ui(false, |ui| {
                 ids.push(GlassButton::new("Disabled").show(ui).id);
             });
             ids.push(GlassButton::new("Last").show(ui).id);
         });
+        output.textures_delta.clear();
         ids.clone()
     };
-    let ids = run(vec![], Modifiers::NONE);
+    let ids = run(vec![]);
     ctx.memory_mut(|memory| memory.request_focus(ids[0]));
-    run(vec![key(Key::Tab, Modifiers::NONE)], Modifiers::NONE);
+    run(vec![key(Key::Tab, Modifiers::NONE)]);
     assert_eq!(ctx.memory(|memory| memory.focused()), Some(ids[2]));
-    run(vec![key(Key::Tab, Modifiers::SHIFT)], Modifiers::SHIFT);
+    run(vec![key(Key::Tab, Modifiers::SHIFT)]);
     // Backward focus is resolved against the previous pass's widget order.
-    run(vec![], Modifiers::NONE);
+    run(vec![]);
     assert_eq!(ctx.memory(|memory| memory.focused()), Some(ids[0]));
 }

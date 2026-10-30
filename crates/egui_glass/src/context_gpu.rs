@@ -13,9 +13,8 @@ fn render_state() -> RenderState {
         let target_format = wgpu::TextureFormat::Rgba8Unorm;
         let renderer = egui_wgpu::Renderer::new(&device, target_format, Default::default());
         RenderState {
-            adapter, available_adapters: vec![], device, queue, target_format,
+            instance, adapter, available_adapters: vec![], device, queue, target_format,
             renderer: Arc::new(egui::mutex::RwLock::new(renderer)),
-            surface_config: egui_wgpu::SurfaceConfig::LOW_LATENCY,
         }
     })
 }
@@ -80,21 +79,23 @@ fn managed_fonts_reach_visible_and_twin_contexts() {
         glass.set_fonts(fonts.clone());
         for _ in 0..2 {
             let mut calls = 0;
-            let _ = ctx.run_ui(Default::default(), |ui| {
+            let mut output = ctx.run_ui(Default::default(), |ui| {
                 glass.live_backdrop().clone().run(ui, Color32::WHITE, |ui| {
                     assert_eq!(ui.fonts(|view| view.definitions().families.clone()), fonts.families, "font families in layout {calls}");
                     calls += 1;
                 });
             });
+            output.textures_delta.clear();
             assert!(calls >= 2, "both visible and offscreen layouts must be checked");
         }
     }
     let legacy_rs = render_state();
     crate::init(&legacy_rs, 1);
     let legacy = crate::LiveBackdrop::new(&legacy_rs, Some(fonts.clone()));
-    let _ = ctx.run_ui(Default::default(), |ui| {
+    let mut output = ctx.run_ui(Default::default(), |ui| {
         legacy.run(ui, Color32::WHITE, |ui| {
             assert_eq!(ui.fonts(|view| view.definitions().families.clone()), fonts.families);
         });
     });
+    output.textures_delta.clear();
 }
